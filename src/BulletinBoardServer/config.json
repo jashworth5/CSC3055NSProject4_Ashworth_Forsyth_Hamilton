@@ -1,0 +1,6 @@
+{
+    "port": 4444,
+    "keystore-file": "keystore.jks",
+    "keystore-pass": "test123"
+  }
+  

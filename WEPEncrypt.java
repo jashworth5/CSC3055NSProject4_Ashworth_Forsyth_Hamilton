@@ -1,27 +1,26 @@
-import javax.crypto.Cipher;
-import java.security.NoSuchAlgorithmException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.BadPaddingException;
-import javax.crypto.spec.SecretKeySpec;
-import javax.crypto.SecretKey;
-import java.security.SecureRandom;
 import java.security.InvalidKeyException;
-import java.util.zip.CRC32;
-import java.util.Base64;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Arrays;
+import java.util.Base64;
+import java.util.zip.CRC32;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 /**
  * This file demonstrates WEP LLC Encryption
  *
  * @author Zach Kissel
  */
-class WEPEncrypt
-{
+class WEPEncrypt {
   public static void main(String[] args) throws NoSuchAlgorithmException,
       InvalidKeyException, IllegalBlockSizeException, BadPaddingException,
-      NoSuchPaddingException
-  {
+      NoSuchPaddingException {
     SecureRandom rand = new SecureRandom();
     String msg = "Hello World";
 
@@ -40,7 +39,6 @@ class WEPEncrypt
     System.out.println("Ciphertext: " +
         Base64.getEncoder().encodeToString(ctext));
 
-
     // Decrypt and verify.
     byte[] ptext = LLCDecrypt(iv, key, ctext);
 
@@ -52,18 +50,17 @@ class WEPEncrypt
    * This method generates the per frame key and uses it to encrypt the
    * frame.
    *
-   * @param iv the initialization vector.
-   * @param key the master key
+   * @param iv     the initialization vector.
+   * @param key    the master key
    * @param blocks the message blocks.
    * @return the encrypted message (frame) as bytes.
    */
-  public static byte[] LLCEncrypt( byte[] iv, byte[] key, byte[] blocks) throws
-      NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException,
-      BadPaddingException, NoSuchPaddingException
-  {
+  public static byte[] LLCEncrypt(byte[] iv, byte[] key, byte[] blocks)
+      throws NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException,
+      BadPaddingException, NoSuchPaddingException {
 
-    Cipher rc4;       // The cipher object
-    SecretKey pfk;    // The per frame key.
+    Cipher rc4; // The cipher object
+    SecretKey pfk; // The per frame key.
 
     // ARC4 is the open standard version of RC4.
     rc4 = Cipher.getInstance("ARCFOUR");
@@ -83,21 +80,20 @@ class WEPEncrypt
    * This method generates the per frame key and uses it to decrypt the
    * frame.
    *
-   * @param iv the initialization vector.
-   * @param key the master key
+   * @param iv     the initialization vector.
+   * @param key    the master key
    * @param blocks the message blocks.
    * @return the encrypted message (frame) as bytes if ICV is valid; otherwise,
-   * return null.
+   *         return null.
    */
-  public static byte[] LLCDecrypt( byte[] iv, byte[] key, byte[] blocks) throws
-      NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException,
-      BadPaddingException, NoSuchPaddingException
-  {
+  public static byte[] LLCDecrypt(byte[] iv, byte[] key, byte[] blocks)
+      throws NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException,
+      BadPaddingException, NoSuchPaddingException {
 
-    Cipher rc4;       // The cipher object
-    SecretKey pfk;    // The per frame key.
-    byte[] icv;       // The integrity check value.
-    byte[] msg;       // The message bytes.
+    Cipher rc4; // The cipher object
+    SecretKey pfk; // The per frame key.
+    byte[] icv; // The integrity check value.
+    byte[] msg; // The message bytes.
     CRC32 cksum = new CRC32();
 
     // ARC4 is the open standard version of RC4.
@@ -136,8 +132,7 @@ class WEPEncrypt
    * @param msg the message to encrypt.
    * @return the message block as bytes.
    */
-  public static byte[] prepareMessage(String msg)
-  {
+  public static byte[] prepareMessage(String msg) {
     CRC32 cksum = new CRC32();
     byte[] cksumValue;
 
@@ -156,19 +151,18 @@ class WEPEncrypt
   /**
    * This method constructs the perframe key from the IV and master key.
    *
-   * @param iv the initialization vector.
+   * @param iv  the initialization vector.
    * @param key the master key.
    * @returns an ARC4 secret key which serves as the per frame key.
    */
-   private static SecretKey generatePerFrameKey(byte[] iv, byte[] key)
-   {
-     // construct the per-frame key bytes.
-     byte[] pfk = new byte[8];
-     System.arraycopy(iv, 0, pfk, 0, iv.length);
-     System.arraycopy(key, 0, pfk, iv.length, key.length);
+  private static SecretKey generatePerFrameKey(byte[] iv, byte[] key) {
+    // construct the per-frame key bytes.
+    byte[] pfk = new byte[8];
+    System.arraycopy(iv, 0, pfk, 0, iv.length);
+    System.arraycopy(key, 0, pfk, iv.length, key.length);
 
-     return new SecretKeySpec(pfk, "ARCFOUR");
-   }
+    return new SecretKeySpec(pfk, "ARCFOUR");
+  }
 
   /**
    * This method converts a long value into an 8-byte value.
@@ -176,16 +170,14 @@ class WEPEncrypt
    * @param num the number to convert to bytes.
    * @return an array of 8 bytes representing the number num.
    */
-   private static byte[] longToBytes(long num)
-   {
-     byte[] res = new byte[8];
+  private static byte[] longToBytes(long num) {
+    byte[] res = new byte[8];
 
-     // Decompose the a long type into byte components.
-     for (int i = 7; i >= 0; i--)
-     {
-      res[i] = (byte)(num & 0xFF);
+    // Decompose the a long type into byte components.
+    for (int i = 7; i >= 0; i--) {
+      res[i] = (byte) (num & 0xFF);
       num >>= 8;
-     }
+    }
 
     return res;
   }

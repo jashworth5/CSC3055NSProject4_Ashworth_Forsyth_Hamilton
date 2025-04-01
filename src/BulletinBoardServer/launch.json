@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Run BulletinBoardServer",
+      "request": "launch",
+      "mainClass": "BulletinBoardServer",
+      "cwd": "${workspaceFolder}/src/BulletinBoardServer",
+      "vmArgs": "-cp .;json-simple-1.1.1.jar",
+      "args": ["--config", "config.json"]
+    }
+  ]
+}
+
