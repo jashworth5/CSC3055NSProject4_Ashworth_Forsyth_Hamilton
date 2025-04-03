@@ -29,7 +29,7 @@ public class BulletinBoardService {
                 throw new IllegalArgumentException("Missing required configuration keys.");
             }
 
-            int port = Math.toIntExact((Long) config.get(CONFIG_KEY_PORT));
+            int port = ((Double) config.get(CONFIG_KEY_PORT)).intValue();
             String keystorePath = (String) config.get(CONFIG_KEY_KEYSTORE_FILE);
             String keystorePass = (String) config.get(CONFIG_KEY_KEYSTORE_PASS);
 
