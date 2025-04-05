@@ -37,4 +37,8 @@ public class UserDatabase {
     public boolean userExists(String username) {
         return users.containsKey(username);
     }
+
+    public JSONObject getUser(String username) {
+        return users.get(username);
+    }
 }
