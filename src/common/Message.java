@@ -32,7 +32,6 @@ public  abstract class Message implements JSONSerializable {
      * 
      * @return JSONObject representation of the message
      */
-    @Override
     public JSONObject toJSONObject() {
         JSONObject obj = new JSONObject();
         obj.put("type", type);
