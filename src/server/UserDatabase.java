@@ -1,19 +1,30 @@
 package src.server;
 
+<<<<<<< HEAD
+import util.EncryptionUtil;
+import util.TotpVerifier;
 import merrimackutil.json.JsonIO;
 import merrimackutil.json.types.JSONArray;
 import merrimackutil.json.types.JSONObject;
 
+=======
+>>>>>>> b596f0911838ced208ab87748b0c616d58cbd794
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
+import merrimackutil.json.JsonIO;
+import merrimackutil.json.types.JSONArray;
+import merrimackutil.json.types.JSONObject;
+import util.TotpVerifier;
+
 // imports added later
 
-import src.util.TotpVerifier; 
-//import src.util.CryptoUtils;
+//import src.util.TotpVerifier; 
+//import src.util.CryptoUtils; 
 
 public class UserDatabase {
     private final File userFile;
@@ -30,7 +41,10 @@ public class UserDatabase {
     private void loadUsers() throws IOException {
         if (!userFile.exists()) {
             userFile.createNewFile();
-            JsonIO.writeObject(userFile, new JSONArray());  // empty list of users
+            try (FileWriter writer = new FileWriter(userFile)) {
+            writer.write("[]");
+}
+  // empty list of users
         }
 
         JSONArray userArray = JsonIO.readArray(userFile);
@@ -48,7 +62,10 @@ public class UserDatabase {
         for (JSONObject obj : users.values()) {
             array.add(obj);
         }
-        JsonIO.writeArray(userFile, array);
+        try (FileWriter writer = new FileWriter(userFile)) {
+            writer.write(array.toString());
+        }
+        
     }
 
     /**
@@ -66,19 +83,19 @@ public class UserDatabase {
 
         try {
             // === TODO: generate random 128-bit salt
-            byte[] salt = CryptoUtils.generateRandomBytes(16);
+            //byte[] salt = EncryptionUtil.generateRandomBytes(16);
 
             // === TODO: hash password with SCRYPT using parameters from spec
-            byte[] hashedPassword = CryptoUtils.scryptHash(password, salt);
+            //byte[] hashedPassword = EncryptionUtil.scryptHash(password, salt);
 
             // === TODO: generate random TOTP key (e.g., 160 bits)
-            byte[] totpKey = CryptoUtils.generateRandomBytes(20);
+            //byte[] totpKey = EncryptionUtil.generateRandomBytes(20);
 
             JSONObject userObj = new JSONObject();
             userObj.put("user", username);
-            userObj.put("pass", Base64.getEncoder().encodeToString(hashedPassword));
-            userObj.put("salt", Base64.getEncoder().encodeToString(salt));
-            userObj.put("totp-key", Base64.getEncoder().encodeToString(totpKey));
+            //userObj.put("pass", Base64.getEncoder().encodeToString(hashedPassword));
+            //userObj.put("salt", Base64.getEncoder().encodeToString(salt));
+            //userObj.put("totp-key", Base64.getEncoder().encodeToString(totpKey));
             userObj.put("pubkey", base64PublicKey);
 
             users.put(username, userObj);
@@ -110,9 +127,10 @@ public class UserDatabase {
             byte[] salt = Base64.getDecoder().decode((String) user.get("salt"));
             byte[] storedHash = Base64.getDecoder().decode((String) user.get("pass"));
 
-            byte[] computed = CryptoUtils.scryptHash(passwordAttempt, salt);
+            //byte[] computed = EncryptionUtil.scryptHash(passwordAttempt, salt);
 
             return java.util.Arrays.equals(storedHash, computed);
+            
         } catch (Exception e) {
             return false;
         }
