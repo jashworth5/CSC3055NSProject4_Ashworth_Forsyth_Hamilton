@@ -1,17 +1,25 @@
 package server;
 
+<<<<<<< HEAD
 import util.EncryptionUtil;
 import util.TotpVerifier;
 import merrimackutil.json.JsonIO;
 import merrimackutil.json.types.JSONArray;
 import merrimackutil.json.types.JSONObject;
 
+=======
+>>>>>>> b596f0911838ced208ab87748b0c616d58cbd794
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+
+import merrimackutil.json.JsonIO;
+import merrimackutil.json.types.JSONArray;
+import merrimackutil.json.types.JSONObject;
+import util.TotpVerifier;
 
 // imports added later
 
