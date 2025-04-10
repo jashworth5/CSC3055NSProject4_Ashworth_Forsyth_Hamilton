@@ -7,24 +7,19 @@ import merrimackutil.json.types.JSONType;
 import java.io.InvalidObjectException;
 
 /**
- * represents a client request to authenticate with username password and otp
- * includes a plaintext password and time-based one time password
+ * represents a client request to retrieve all messages addressed to a specific user
  */
-public class AuthenticateMessage implements JSONSerializable {
+public class GetMessage implements JSONSerializable {
 
-    private static final String TYPE = "authenticate";
+    private static final String TYPE = "GetMessage";
 
     private String user;
-    private String pass;
-    private String otp;
 
-    public AuthenticateMessage(String user, String pass, String otp) {
+    public GetMessage(String user) {
         this.user = user;
-        this.pass = pass;
-        this.otp = otp;
     }
 
-    public AuthenticateMessage() {
+    public GetMessage() {
         // used for deserialization
     }
 
@@ -32,32 +27,22 @@ public class AuthenticateMessage implements JSONSerializable {
         return user;
     }
 
-    public String getPass() {
-        return pass;
-    }
-
-    public String getOtp() {
-        return otp;
-    }
-
     @Override
     /**
      * converts this message into a json object to send to the server
-     * includes the required type field along with username password and otp
+     * includes the required type field and the username field
      */
     public JSONType toJSONType() {
         JSONObject obj = new JSONObject();
         obj.put("type", TYPE);
         obj.put("user", user);
-        obj.put("pass", pass);
-        obj.put("otp", otp);
         return obj;
     }
 
     @Override
     /**
      * populates this message from a received json object
-     * validates the type field and extracts username password and otp
+     * validates the type field and extracts the username field
      */
     public void deserialize(JSONType obj) throws InvalidObjectException {
         if (!(obj instanceof JSONObject)) {
@@ -72,7 +57,5 @@ public class AuthenticateMessage implements JSONSerializable {
         }
 
         this.user = (String) json.get("user");
-        this.pass = (String) json.get("pass");
-        this.otp = (String) json.get("otp");
     }
 }
