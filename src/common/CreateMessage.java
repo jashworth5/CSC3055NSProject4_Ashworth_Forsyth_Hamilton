@@ -12,7 +12,7 @@ import java.io.InvalidObjectException;
  */
 public class CreateMessage implements JSONSerializable {
 
-    private static final String TYPE = "Create";
+    private static final String TYPE = "create";
 
     private String user;
     private String pass;

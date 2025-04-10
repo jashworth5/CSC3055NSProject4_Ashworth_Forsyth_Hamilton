@@ -1,41 +1,32 @@
-package src.server;
+package server;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import src.common.Post;
+import common.PostObject;
 import merrimackutil.json.JsonIO;
 import merrimackutil.json.types.JSONArray;
 import merrimackutil.json.types.JSONObject;
-
+import merrimackutil.json.types.JSONType;
 
 public class BulletinBoard {
     private final File boardFile;
-    private final Map<String, List<Post>> userPosts; // Maps usernames to their posts
+    private final Map<String, List<PostObject>> userPosts;
 
-    /**
-     * Constructs a new BulletinBoard object.
-     * 
-     * @param boardFile The file to store the bulletin board data.
-     */
     public BulletinBoard(String filePath) {
         this.boardFile = new File(filePath);
         this.userPosts = new HashMap<>();
 
-        // Load existing posts from the file if it exists
         if (boardFile.exists()) {
             try {
                 JSONObject root = JsonIO.readObject(boardFile);
                 JSONArray postsArray = (JSONArray) root.get("posts");
 
                 for (int i = 0; i < postsArray.size(); i++) {
-                    JSONObject postObj = (JSONObject) postsArray.get(i);
-                    Post post = new Post(postObj);
+                    PostObject post = new PostObject();
+                    post.deserialize((JSONType) postsArray.get(i));
                     addToMemory(post);
                 }
 
@@ -44,38 +35,22 @@ public class BulletinBoard {
                 System.err.println("[!] Failed to load bulletin board: " + e.getMessage());
             }
         } else {
-            // Create empty bulletin board
             saveBulletinBoard();
         }
     }
 
-    private void addToMemory(Post post) {
+    private void addToMemory(PostObject post) {
         String username = post.getUser();
-        if(!userPosts.containsKey(username)) {
-            userPosts.put(username, new ArrayList<>());
-        }
-        userPosts.get(username).add(post);
+        userPosts.computeIfAbsent(username, k -> new ArrayList<>()).add(post);
     }
 
-    /**
-     * Adds a new post to the bulletin board.
-     * 
-     * @param post The post to add.
-     */
-    public boolean addPost(Post post) {
+    public boolean addPost(PostObject post) {
         addToMemory(post);
         return saveBulletinBoard();
     }
 
-    /**
-     * Get all posts from the user
-     * 
-     * @param username The username of the user whose posts to retrieve
-     * @return List of posts from the user
-     */
-     public Post[] getPosts(String username) {
-        List<Post> posts = userPosts.getOrDefault(username, new ArrayList<>());
-        return posts.toArray(new Post[0]);
+    public List<PostObject> getPosts(String username) {
+        return userPosts.getOrDefault(username, new ArrayList<>());
     }
 
     private boolean saveBulletinBoard() {
@@ -83,21 +58,17 @@ public class BulletinBoard {
             JSONObject root = new JSONObject();
             JSONArray postsArray = new JSONArray();
 
-            // Add all posts to the array
-            for (List<Post> posts : userPosts.values()) {
-                for (Post post : posts) {
-                    postsArray.add(post.toJSONObject());
+            for (List<PostObject> posts : userPosts.values()) {
+                for (PostObject post : posts) {
+                    postsArray.add(post.toJSONType());
                 }
             }
 
             root.put("posts", postsArray);
 
-            // Create parent directories if they don't exist
-            boardFile.getParentFile().mkdirs();
-
-            // Write to file
             try (FileWriter writer = new FileWriter(boardFile)) {
                 writer.write(root.toString());
+                System.out.println("[+] Saved bulletin board to disk.");
             }
 
             return true;
