@@ -1,4 +1,4 @@
-package server;
+package src.server;
 
 import merrimackutil.json.JsonIO;
 import merrimackutil.json.types.JSONArray;
@@ -12,8 +12,8 @@ import java.util.Map;
 
 // imports added later
 
-//import src.util.TotpVerifier; 
-//import src.util.CryptoUtils; 
+import src.util.TotpVerifier; 
+//import src.util.CryptoUtils;
 
 public class UserDatabase {
     private final File userFile;

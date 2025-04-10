@@ -1,11 +1,11 @@
-package server;
+package src.server;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
-import common.PostObject;
+import src.common.PostObject;
 import merrimackutil.json.JsonIO;
 import merrimackutil.json.types.JSONArray;
 import merrimackutil.json.types.JSONObject;

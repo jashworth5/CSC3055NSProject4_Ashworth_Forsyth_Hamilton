@@ -1,8 +1,8 @@
-package server;
+package src.server;
 
-import util.SocketWrapper;
-import server.UserDatabase;
-import server.BulletinBoard;
+import src.util.SocketWrapper;
+import src.server.UserDatabase;
+import src.server.BulletinBoard;
 
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
