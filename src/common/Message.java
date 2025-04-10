@@ -1,8 +1,7 @@
-package src.common;
+package common;
 
 import merrimackutil.json.JSONSerializable;
 import merrimackutil.json.types.JSONObject;
-import merrimackutil.json.types.JSONType;
 
 
 public  abstract class Message implements JSONSerializable {
