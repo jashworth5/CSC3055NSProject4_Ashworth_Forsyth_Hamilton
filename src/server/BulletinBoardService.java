@@ -3,7 +3,13 @@ package server;
 import util.SocketWrapper;
 import server.UserDatabase;
 import server.BulletinBoard;
+import common.AuthenticateMessage;
 import common.CreateMessage;
+import common.GetMessage;
+import common.PostMessage;
+import common.PostObject;
+import common.PubKeyRequestMessage;
+import common.ResponseMessage;
 import common.StatusMessage;
 
 import javax.net.ssl.SSLServerSocket;
@@ -11,6 +17,7 @@ import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import merrimackutil.json.JsonIO;
 import merrimackutil.json.types.JSONObject;
@@ -62,54 +69,70 @@ public class BulletinBoardService {
 
                 try {
 
-                    // idea: receive the message as raw json
+                    // read message from client, get type
                     JSONObject message = socket.receiveMessage();
                     String type = (String) message.get("type");
 
+                    // check if type is null
                     if (type == null) {
                         System.out.println("missing type field in client message");
                         return;
                     }
                     
+                    // switch statement depending on which type of message the client sent
                     switch (type) {
-                        case "Create":
-                            try {
+                        case "create":
+                            CreateMessage createMsg = new CreateMessage();
+                            createMsg.deserialize(message);
+                            boolean created = userDb.createUser(createMsg.getUser(), createMsg.getPass(), createMsg.getPubkey());
+                            socket.sendMessage(new StatusMessage(created, created ? "User created." : "User already exists."));
+                            break;
 
-                                // deserialize into CreateMessage
-                                CreateMessage createMsg = new CreateMessage();
-                                createMsg.deserialize(message);
-                    
-                                String username = createMsg.getUser();
-                                String password = createMsg.getPass();
-                                String pubkey = createMsg.getPubkey();
-                    
-                                boolean success = userDb.createUser(username, password, pubkey);
-                    
-                                if (success) {
-                                    // later : retrieve totpKey and include in payload
-                                    common.StatusMessage response = new common.StatusMessage(true, "User created.");
-                                    socket.sendMessage(response);
+                        case "authenticate":
+                            AuthenticateMessage auth = new AuthenticateMessage();
+                            auth.deserialize(message);
+                            boolean valid = userDb.validatePassword(auth.getUser(), auth.getPass()) &&
+                                            userDb.validateTOTP(auth.getUser(), auth.getOtp());
+                            socket.sendMessage(new StatusMessage(valid, valid ? "Authentication successful." : "Authentication failed."));
+                            break;
 
-                                } else {
-                                    common.StatusMessage response = new common.StatusMessage(false, "User already exists.");
-                                    socket.sendMessage(response);
-                                }
-                    
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                                common.StatusMessage error = new common.StatusMessage(false, "Unexpected error.");
-                                socket.sendMessage(error);
+                        case "PubKeyRequest":
+                            PubKeyRequestMessage req = new PubKeyRequestMessage();
+                            req.deserialize(message);
+                            String pubkey = userDb.getPublicKey(req.getUser());
+                            boolean found = pubkey != null;
+                            socket.sendMessage(new StatusMessage(found, found ? pubkey : "User not found."));
+                            break;
+
+                        case "post":
+                            PostMessage postMsg = new PostMessage();
+                            postMsg.deserialize(message);
+                            boolean exists = userDb.userExists(postMsg.getUser());
+                            boolean saved = exists && board.addPost(new PostObject(
+                                postMsg.getUser(),
+                                postMsg.getMessage(),
+                                postMsg.getWrappedKey(),
+                                postMsg.getIv()
+                            ));
+                            socket.sendMessage(new StatusMessage(saved, saved ? "Message posted." : "Target user not found."));
+                            break;
+
+                        case "GetMessage":
+                            GetMessage getMsg = new GetMessage();
+                            getMsg.deserialize(message);
+                            List<PostObject> posts = board.getPosts(getMsg.getUser());
+                            if (posts.isEmpty()) {
+                                socket.sendMessage(new StatusMessage(false, "No such user or no messages."));
+                            } else {
+                                socket.sendMessage(new ResponseMessage(posts));
                             }
                             break;
-                    
+
                         default:
-                            StatusMessage unknown = new StatusMessage(false, "Unknown message type.");
-                            socket.sendMessage(unknown);
+                            socket.sendMessage(new StatusMessage(false, "Unknown message type."));
                             break;
                     }
                     
-                    // todo add routing logic here for different types like create authenticate post etc
-
                 } catch (IOException e) {
                     System.out.println("error reading message");
                     e.printStackTrace();

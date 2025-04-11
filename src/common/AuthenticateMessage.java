@@ -12,7 +12,7 @@ import java.io.InvalidObjectException;
  */
 public class AuthenticateMessage implements JSONSerializable {
 
-    private static final String TYPE = "authenticate";
+    private static final String TYPE = "Authenticate";
 
     private String user;
     private String pass;

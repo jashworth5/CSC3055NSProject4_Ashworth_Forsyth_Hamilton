@@ -11,7 +11,7 @@ import java.io.InvalidObjectException;
  */
 public class StatusMessage implements JSONSerializable {
 
-    private static final String TYPE = "status"; 
+    private static final String TYPE = "Status"; 
 
     private boolean status;
     private String payload;
