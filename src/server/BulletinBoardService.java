@@ -57,14 +57,14 @@ public class BulletinBoardService {
             UserDatabase userDb = new UserDatabase(usersFile);
             BulletinBoard board = new BulletinBoard(boardFile);
 
-            System.out.println("server started on port " + port);
+            System.out.println("[+] server started on port " + port);
 
         
             // server loop to accept clients
             while (true) {
                 SSLSocket client = (SSLSocket) serverSocket.accept();
                 SocketWrapper socket = new SocketWrapper(client);
-                System.out.println("client connected");
+                System.out.println("[+] client connected");
 
                 try {
 
@@ -78,17 +78,38 @@ public class BulletinBoardService {
                         return;
                     }
                     
+                    System.out.println("Got type: " + type);
+
+
                     // switch statement depending on which type of message the client sent
                     switch (type) {
                         case "Create":
                             CreateMessage createMsg = new CreateMessage();
                             createMsg.deserialize(message);
-                            boolean created = userDb.createUser(createMsg.getUser(), createMsg.getPass(), createMsg.getPubkey());
-                            socket.sendMessage(new StatusMessage(created, created ? "User created." : "User already exists."));
+                            
+                            boolean created = userDb.createUser(
+                                createMsg.getUser(),
+                                createMsg.getPass(),
+                                createMsg.getPubkey()
+                            );
+
+                            if (created) {
+                                // fetch the generated TOTP key and send it back to the client
+                                String totpKey = userDb.getTotpKey(createMsg.getUser());
+                                socket.sendMessage(new StatusMessage(true, totpKey));
+                            } else {
+                                socket.sendMessage(new StatusMessage(false, "User already exists."));
+                            }
                             break;
 
                         case "Authenticate":
+
                             AuthenticateMessage auth = new AuthenticateMessage();
+
+                            System.out.println("Valid password? " + userDb.validatePassword(auth.getUser(), auth.getPass()));
+                            System.out.println("Valid TOTP? " + userDb.validateTOTP(auth.getUser(), auth.getOtp()));
+
+
                             auth.deserialize(message);
                             boolean valid = userDb.validatePassword(auth.getUser(), auth.getPass()) &&
                                             userDb.validateTOTP(auth.getUser(), auth.getOtp());

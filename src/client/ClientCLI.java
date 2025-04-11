@@ -9,7 +9,7 @@ import client.Client; // Ensure the Client class is in the 'client' package or a
 
 public class ClientCLI {
     private static final String SERVER_HOST = "localhost";
-    private static final int SERVER_PORT = 4444;
+    private static final int SERVER_PORT = 5001;
     private static final String TRUSTSTORE_FILE = "clienttruststore.p12";
     private static final String TRUSTSTORE_PASSWORD = "password123";
     

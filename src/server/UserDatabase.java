@@ -3,8 +3,12 @@ package server;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import merrimackutil.json.JsonIO;
@@ -13,23 +17,29 @@ import merrimackutil.json.types.JSONObject;
 import util.TotpVerifier;
 import util.EncryptionUtil;
 
-// imports added later
+import com.fasterxml.jackson.core.type.TypeReference;
+// could not achieve correct saving of user JSON objects onto file without this JACKSON
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+
 
 //import src.util.TotpVerifier; 
 //import src.util.CryptoUtils; 
 
 public class UserDatabase {
     private final File userFile;
-    private final Map<String, JSONObject> users = new HashMap<>();
+    private final Map<String, Map<String, Object>> users = new HashMap<>();
+
 
     public UserDatabase(String userFilePath) throws IOException {
         this.userFile = new File(userFilePath);
         loadUsers();
     }
 
-   /**
-    * Loads the user JSON database from disk into memory.
-    */
+   
+    /**
+     * Loads the user JSON database from disk into memory using Jackson.
+     */
     private void loadUsers() throws IOException {
         if (!userFile.exists()) {
             userFile.createNewFile();
@@ -38,30 +48,30 @@ public class UserDatabase {
             }
         }
 
-        JSONObject root = JsonIO.readObject(userFile);
-        JSONArray userArray = (JSONArray) root.get("entries");
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, Object> root = mapper.readValue(userFile, new TypeReference<>() {});
 
-        for (int i = 0; i < userArray.size(); i++) {
-            JSONObject userObj = (JSONObject) userArray.get(i);
-            users.put((String) userObj.get("user"), userObj);
+        List<Map<String, Object>> userList = (List<Map<String, Object>>) root.get("entries");
+
+        for (Map<String, Object> userObj : userList) {
+            String username = (String) userObj.get("user");
+            users.put(username, userObj);
         }
-    }
+    }   
+
 
     /**
      * Writes the in-memory users map back to disk.
      */
     private void saveUsers() throws IOException {
-        JSONArray array = new JSONArray();
-        for (JSONObject obj : users.values()) {
-            array.add(obj);
-        }
+        // Create the wrapper object: { "entries": [...] }
+        Map<String, Object> wrapper = new HashMap<>();
+        wrapper.put("entries", new ArrayList<>(users.values()));
 
-        JSONObject root = new JSONObject();
-        root.put("entries", array);
-
-        try (FileWriter writer = new FileWriter(userFile)) {
-            writer.write(root.toString());
-        }
+        // Pretty print JSON using Jackson
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectWriter writer = mapper.writerWithDefaultPrettyPrinter();
+        writer.writeValue(userFile, wrapper);
     }
 
 
@@ -120,7 +130,8 @@ public class UserDatabase {
         if (!userExists(username)) return false;
 
         try {
-            JSONObject user = users.get(username);
+            Map<String, Object> user = users.get(username);
+
             byte[] salt = Base64.getDecoder().decode((String) user.get("salt"));
             byte[] storedHash = Base64.getDecoder().decode((String) user.get("pass"));
 
