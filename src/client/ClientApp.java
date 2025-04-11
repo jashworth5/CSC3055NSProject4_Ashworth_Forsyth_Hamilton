@@ -1,8 +1,7 @@
-package src.client;
+package client;
 
 import java.util.List;
 import java.util.Scanner;
-import java.util.Base64;
 
 public class ClientApp {
     private static final String SERVER_HOST = "localhost";

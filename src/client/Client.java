@@ -1,30 +1,28 @@
-package src.client;
+package client;
 
 
-import src.common.*;
-import src.util.SocketWrapper;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManagerFactory;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
-import java.util.Base64;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
-import src.util.EncryptionUtil;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 
-import merrimackutil.json.types.JSONObject;
-import merrimackutil.json.types.JSONType;
+import common.AuthenticateMessage;
+import common.CreateMessage;
+import common.GetMessage;
+import common.PostMessage;
+import common.PostObject;
+import common.PubKeyRequestMessage;
+import common.StatusMessage;
 import merrimackutil.json.JsonIO;
 import merrimackutil.json.types.JSONArray;
+import merrimackutil.json.types.JSONType;
+import util.EncryptionUtil;
+import util.SocketWrapper;
 
 
 public class Client {

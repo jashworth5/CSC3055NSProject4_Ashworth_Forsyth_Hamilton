@@ -1,10 +1,4 @@
-package src.server;
-
-import src.util.EncryptionUtil;
-import src.util.TotpVerifier;
-import merrimackutil.json.JsonIO;
-import merrimackutil.json.types.JSONArray;
-import merrimackutil.json.types.JSONObject;
+package server;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -16,7 +10,8 @@ import java.util.Map;
 import merrimackutil.json.JsonIO;
 import merrimackutil.json.types.JSONArray;
 import merrimackutil.json.types.JSONObject;
-import src.util.TotpVerifier;
+import util.EncryptionUtil;
+import util.TotpVerifier;
 
 // imports added later
 
@@ -124,7 +119,7 @@ public class UserDatabase {
             byte[] salt = Base64.getDecoder().decode((String) user.get("salt"));
             byte[] storedHash = Base64.getDecoder().decode((String) user.get("pass"));
 
-            //byte[] computed = EncryptionUtil.scryptHash(passwordAttempt, salt);
+            byte[] computed = EncryptionUtil.scryptHash(passwordAttempt, salt);
 
             return java.util.Arrays.equals(storedHash, computed);
             
