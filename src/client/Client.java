@@ -44,7 +44,7 @@ public class Client {
         this.trustStorePassword = trustStorePassword;
     }
 
-    private SocketWrapper connect() throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException {
+    private SocketWrapper connectToServer() throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException {
         System.setProperty("javax.net.ssl.trustStore", trustStoreFile);
         System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
 
