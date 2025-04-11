@@ -61,7 +61,7 @@ public class Client {
         this.privateKey = keyPair[1];
         
         // Connect to server
-        SocketWrapper socket = connectToServer();
+        SocketWrapper socket = connect();
         try {
             // Send create account message
             CreateMessage createMsg = new CreateMessage(username, password, publicKey);
@@ -86,7 +86,7 @@ public class Client {
     }
 
     public boolean authenticate(String username, String password, String otpCode) throws Exception {
-        SocketWrapper socket = connectToServer();
+        SocketWrapper socket = connect();
         try {
             // Send authentication message
             AuthenticateMessage authMsg = new AuthenticateMessage(username, password, otpCode);
@@ -119,7 +119,7 @@ public class Client {
             throw new IllegalStateException("Must be authenticated first");
         }
         
-        SocketWrapper socket = connectToServer();
+        SocketWrapper socket = connect();
         try {
             PubKeyRequestMessage keyRequest = new PubKeyRequestMessage(targetUser);
             socket.sendMessage(keyRequest);
@@ -153,7 +153,7 @@ public class Client {
         String iv = encrypted[2];                   // Initialization vector
         
         // Send post request
-        SocketWrapper socket = connectToServer();
+        SocketWrapper socket = connect();
         try {
             PostMessage postMsg = new PostMessage(recipient, encryptedMessage, wrappedKey, iv);
             socket.sendMessage(postMsg);
@@ -173,7 +173,7 @@ public class Client {
             throw new IllegalStateException("Must be authenticated first");
         }
         
-        SocketWrapper socket = connectToServer();
+        SocketWrapper socket = connect();
         try {
             // Send get message request
             GetMessage getMsg = new GetMessage(username);
