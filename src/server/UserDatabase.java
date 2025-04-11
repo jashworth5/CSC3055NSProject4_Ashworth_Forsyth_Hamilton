@@ -1,7 +1,7 @@
 package src.server;
 
-import util.EncryptionUtil;
-import util.TotpVerifier;
+import src.util.EncryptionUtil;
+import src.util.TotpVerifier;
 import merrimackutil.json.JsonIO;
 import merrimackutil.json.types.JSONArray;
 import merrimackutil.json.types.JSONObject;
@@ -16,7 +16,7 @@ import java.util.Map;
 import merrimackutil.json.JsonIO;
 import merrimackutil.json.types.JSONArray;
 import merrimackutil.json.types.JSONObject;
-import util.TotpVerifier;
+import src.util.TotpVerifier;
 
 // imports added later
 

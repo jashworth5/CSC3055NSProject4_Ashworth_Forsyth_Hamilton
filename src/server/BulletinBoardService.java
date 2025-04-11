@@ -1,8 +1,8 @@
 package src.server;
 
-import util.SocketWrapper;
-import server.UserDatabase;
-import server.BulletinBoard;
+import src.util.SocketWrapper;
+import src.server.UserDatabase;
+import src.server.BulletinBoard;
 
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
@@ -10,7 +10,7 @@ import javax.net.ssl.SSLSocket;
 
 import merrimackutil.json.JsonIO;
 import merrimackutil.json.types.JSONObject;
-import util.SocketWrapper;
+import src.util.SocketWrapper;
 
 public class BulletinBoardService {
 
