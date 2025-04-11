@@ -1,4 +1,4 @@
-package src.util;
+package util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -50,7 +50,7 @@ public class SocketWrapper {
         if (jsonString == null) {
             throw new IOException("Connection closed by remote host");
         }
-        return JsonIO.parseObject(jsonString);
+        return JsonIO.readObject(jsonString);
     }
 
     /**
