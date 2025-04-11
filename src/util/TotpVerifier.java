@@ -1,4 +1,4 @@
-package src.util;
+package util;
 
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
