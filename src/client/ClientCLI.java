@@ -3,6 +3,9 @@ package client;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Base64;
+import client.Client; // Ensure the Client class is in the 'client' package or adjust the import path accordingly
+
+
 
 public class ClientCLI {
     private static final String SERVER_HOST = "localhost";

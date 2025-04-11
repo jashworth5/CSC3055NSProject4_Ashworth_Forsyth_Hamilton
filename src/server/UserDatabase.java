@@ -27,19 +27,20 @@ public class UserDatabase {
         loadUsers();
     }
 
-    /**
-     * Loads the user JSON database from disk into memory.
-     */
+   /**
+    * Loads the user JSON database from disk into memory.
+    */
     private void loadUsers() throws IOException {
         if (!userFile.exists()) {
             userFile.createNewFile();
             try (FileWriter writer = new FileWriter(userFile)) {
-            writer.write("[]");
-}
-  // empty list of users
+                writer.write("{\"entries\": []}");
+            }
         }
 
-        JSONArray userArray = JsonIO.readArray(userFile);
+        JSONObject root = JsonIO.readObject(userFile);
+        JSONArray userArray = (JSONArray) root.get("entries");
+
         for (int i = 0; i < userArray.size(); i++) {
             JSONObject userObj = (JSONObject) userArray.get(i);
             users.put((String) userObj.get("user"), userObj);
@@ -54,11 +55,15 @@ public class UserDatabase {
         for (JSONObject obj : users.values()) {
             array.add(obj);
         }
+
+        JSONObject root = new JSONObject();
+        root.put("entries", array);
+
         try (FileWriter writer = new FileWriter(userFile)) {
-            writer.write(array.toString());
+            writer.write(root.toString());
         }
-        
     }
+
 
     /**
      * Checks if a user already exists.
@@ -75,19 +80,19 @@ public class UserDatabase {
 
         try {
             // === TODO: generate random 128-bit salt
-            //byte[] salt = EncryptionUtil.generateRandomBytes(16);
+            byte[] salt = EncryptionUtil.generateRandomBytes(16);
 
             // === TODO: hash password with SCRYPT using parameters from spec
-            //byte[] hashedPassword = EncryptionUtil.scryptHash(password, salt);
+            byte[] hashedPassword = EncryptionUtil.scryptHash(password, salt);
 
             // === TODO: generate random TOTP key (e.g., 160 bits)
-            //byte[] totpKey = EncryptionUtil.generateRandomBytes(20);
+            byte[] totpKey = EncryptionUtil.generateRandomBytes(20);
 
             JSONObject userObj = new JSONObject();
             userObj.put("user", username);
-            //userObj.put("pass", Base64.getEncoder().encodeToString(hashedPassword));
-            //userObj.put("salt", Base64.getEncoder().encodeToString(salt));
-            //userObj.put("totp-key", Base64.getEncoder().encodeToString(totpKey));
+            userObj.put("pass", Base64.getEncoder().encodeToString(hashedPassword));
+            userObj.put("salt", Base64.getEncoder().encodeToString(salt));
+            userObj.put("totp-key", Base64.getEncoder().encodeToString(totpKey));
             userObj.put("pubkey", base64PublicKey);
 
             users.put(username, userObj);

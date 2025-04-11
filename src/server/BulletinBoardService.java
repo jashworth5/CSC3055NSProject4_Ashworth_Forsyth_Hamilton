@@ -21,7 +21,6 @@ import java.util.List;
 
 import merrimackutil.json.JsonIO;
 import merrimackutil.json.types.JSONObject;
-import util.SocketWrapper;
 
 public class BulletinBoardService {
 
@@ -81,14 +80,14 @@ public class BulletinBoardService {
                     
                     // switch statement depending on which type of message the client sent
                     switch (type) {
-                        case "create":
+                        case "Create":
                             CreateMessage createMsg = new CreateMessage();
                             createMsg.deserialize(message);
                             boolean created = userDb.createUser(createMsg.getUser(), createMsg.getPass(), createMsg.getPubkey());
                             socket.sendMessage(new StatusMessage(created, created ? "User created." : "User already exists."));
                             break;
 
-                        case "authenticate":
+                        case "Authenticate":
                             AuthenticateMessage auth = new AuthenticateMessage();
                             auth.deserialize(message);
                             boolean valid = userDb.validatePassword(auth.getUser(), auth.getPass()) &&
@@ -104,7 +103,7 @@ public class BulletinBoardService {
                             socket.sendMessage(new StatusMessage(found, found ? pubkey : "User not found."));
                             break;
 
-                        case "post":
+                        case "Post":
                             PostMessage postMsg = new PostMessage();
                             postMsg.deserialize(message);
                             boolean exists = userDb.userExists(postMsg.getUser());
