@@ -207,7 +207,7 @@ public class Client {
 
     private List<PostObject> parsePostObjects(String jsonPayload) {
         try{
-            JSONArray postsArray = JsonIO.parseArray(jsonPayload);
+            JSONArray postsArray = JsonIO.readArray(jsonPayload);
 
             List<PostObject> posts = new ArrayList<>();
 
