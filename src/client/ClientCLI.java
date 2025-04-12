@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Scanner;
 import java.io.Console;
 import java.util.Base64;
-import client.Client; 
-
 
 
 public class ClientCLI {
@@ -96,7 +94,7 @@ public class ClientCLI {
         String base32Key = merrimackutil.codec.Base32.encodeToString(rawKey, false);
 
         System.out.println("\nAccount created successfully!");
-        System.out.println("Your private key (Base64): " + client.getPrivateKey()); // 👈 NEW LINE
+        System.out.println("Your private key (Base64): pasted inside the file " + username + "_privkey.txt");
         System.out.println("Your TOTP key (Base32): " + base32Key);
         System.out.println("Use this key with a TOTP app like Google Authenticator.");
         System.out.println("For browser testing, paste it here: https://totp.danhersam.com");

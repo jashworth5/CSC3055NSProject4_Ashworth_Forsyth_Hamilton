@@ -1,8 +1,6 @@
 package server;
 
 import util.SocketWrapper;
-import server.UserDatabase;
-import server.BulletinBoard;
 import common.AuthenticateMessage;
 import common.CreateMessage;
 import common.GetMessage;

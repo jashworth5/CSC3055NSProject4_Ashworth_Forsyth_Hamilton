@@ -13,14 +13,9 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.List;
-import java.util.ArrayList;
-
 import util.EncryptionUtil;
-
 import merrimackutil.json.types.JSONObject;
-import merrimackutil.json.types.JSONType;
-import merrimackutil.json.JsonIO;
-import merrimackutil.json.types.JSONArray;
+
 
 
 public class Client {
@@ -154,7 +149,6 @@ public class Client {
         String recipientPublicKey = getPublicKey(recipient);
         
         // Encrypt the message
-        // This would use EncryptionUtil methods
         String[] encrypted = encryptMessage(message, recipientPublicKey);
         String encryptedMessage = encrypted[0];     // AES-encrypted message
         String wrappedKey = encrypted[1];           // ElGamal-encrypted AES key
@@ -216,24 +210,6 @@ public class Client {
 
     private String[] encryptMessage(String message, String publicKey) throws Exception {
         return EncryptionUtil.encryptMessage(message, publicKey);
-    }
-
-    private List<PostObject> parsePostObjects(String jsonPayload) {
-        try{
-            JSONArray postsArray = JsonIO.readArray(jsonPayload);
-
-            List<PostObject> posts = new ArrayList<>();
-
-            for (int i = 0; i < postsArray.size(); i++) {
-                PostObject post = new PostObject();
-                post.deserialize((JSONType) postsArray.get(i));
-                posts.add(post);
-            }
-            return posts;
-        } catch (Exception e) {
-            System.err.println("Failed to parse posts: " + e.getMessage());
-            return new ArrayList<>();
-        }
     }
 
     private List<String> decryptPosts(List<PostObject> posts, String privateKey) {

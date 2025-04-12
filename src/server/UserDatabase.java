@@ -3,16 +3,11 @@ package server;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import merrimackutil.json.JsonIO;
-import merrimackutil.json.types.JSONArray;
 import merrimackutil.json.types.JSONObject;
 import util.TotpVerifier;
 import util.EncryptionUtil;
@@ -51,6 +46,7 @@ public class UserDatabase {
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> root = mapper.readValue(userFile, new TypeReference<>() {});
 
+        @SuppressWarnings("unchecked")
         List<Map<String, Object>> userList = (List<Map<String, Object>>) root.get("entries");
 
         for (Map<String, Object> userObj : userList) {
