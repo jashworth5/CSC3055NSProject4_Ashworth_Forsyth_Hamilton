@@ -2,8 +2,9 @@ package client;
 
 import java.util.List;
 import java.util.Scanner;
+import java.io.Console;
 import java.util.Base64;
-import client.Client; // Ensure the Client class is in the 'client' package or adjust the import path accordingly
+import client.Client; 
 
 
 
@@ -67,24 +68,40 @@ public class ClientCLI {
         System.out.print("> ");
     }
 
-    //Create Account
+    // Create Account
     private static void createAccount() throws Exception {
         System.out.println("\n=== Create New Account ===");
-        
+
         System.out.print("Enter username: ");
         String username = scanner.nextLine().trim();
-        
-        System.out.print("Enter password: ");
-        String password = scanner.nextLine().trim();
-        
+
+        Console console = System.console();
+        String password;
+        if (console != null) {
+            char[] pwdArray = console.readPassword("Enter password: ");
+            password = new String(pwdArray);
+        } else {
+            System.out.print("Enter password: ");
+            password = scanner.nextLine().trim();
+        }
+
+
         System.out.println("Creating account...");
-        String totpKey = client.createAccount(username, password);
-        
+        String base64TotpKey = client.createAccount(username, password);
+
+        // Decode base64 to raw bytes
+        byte[] rawKey = Base64.getDecoder().decode(base64TotpKey);
+
+        // Encode as Base32
+        String base32Key = merrimackutil.codec.Base32.encodeToString(rawKey, false);
+
         System.out.println("\nAccount created successfully!");
-        System.out.println("Your TOTP key (Base64): " + totpKey);
-        System.out.println("Please save this key and use it with a TOTP app like Google Authenticator");
-        System.out.println("For testing, you can use https://totp.danhersam.com/ with this key");
+        System.out.println("Your private key (Base64): " + client.getPrivateKey()); // 👈 NEW LINE
+        System.out.println("Your TOTP key (Base32): " + base32Key);
+        System.out.println("Use this key with a TOTP app like Google Authenticator.");
+        System.out.println("For browser testing, paste it here: https://totp.danhersam.com");
     }
+
 
 
     //Authenticate with server
@@ -95,8 +112,19 @@ public class ClientCLI {
         System.out.print("Enter username: ");
         String username = scanner.nextLine().trim();
         
-        System.out.print("Enter password: ");
-        String password = scanner.nextLine().trim();
+        Console console = System.console();
+        String password;
+
+        if (console != null) {
+            char[] pwdArray = console.readPassword("Enter password: ");
+            password = new String(pwdArray);
+        } else {
+            
+            // Fallback for IDEs or environments that don't support Console
+            System.out.print("Enter password: ");
+            password = scanner.nextLine().trim();
+        }
+
         
         System.out.print("Enter TOTP code: ");
         String otpCode = scanner.nextLine().trim();
@@ -144,7 +172,7 @@ public class ClientCLI {
             System.out.println("You must log in first!");
             return;
         }
-        
+            
         System.out.println("\n=== Your Messages ===");
         System.out.println("Retrieving messages...");
         

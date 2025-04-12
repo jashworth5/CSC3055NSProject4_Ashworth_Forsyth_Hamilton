@@ -128,33 +128,54 @@ public class UserDatabase {
      */
     public boolean validatePassword(String username, String passwordAttempt) {
         if (!userExists(username)) return false;
-
+    
         try {
             Map<String, Object> user = users.get(username);
-
-            byte[] salt = Base64.getDecoder().decode((String) user.get("salt"));
-            byte[] storedHash = Base64.getDecoder().decode((String) user.get("pass"));
-
+    
+            String saltStr = String.valueOf(user.get("salt"));
+            String passStr = String.valueOf(user.get("pass"));
+            
+            System.out.println("Raw stored password string: " + passStr);
+            System.out.println("Raw salt string: " + saltStr);
+            
+            byte[] salt = Base64.getDecoder().decode(saltStr);
+            byte[] storedHash = Base64.getDecoder().decode(passStr);
             byte[] computed = EncryptionUtil.scryptHash(passwordAttempt, salt);
-
+            
+            System.out.println("Stored hash: " + Base64.getEncoder().encodeToString(storedHash));
+            System.out.println("Computed: " + Base64.getEncoder().encodeToString(computed));
+            System.out.println("Match: " + java.util.Arrays.equals(storedHash, computed));
+            
             return java.util.Arrays.equals(storedHash, computed);
             
         } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
     }
+    
 
     /**
      * Validates a TOTP token using stored TOTP key.
      */
     public boolean validateTOTP(String username, String otpCode) {
         if (!userExists(username)) return false;
-
-        String base64TotpKey = (String) users.get(username).get("totp-key");
-        byte[] totpKey = Base64.getDecoder().decode(base64TotpKey);
-
-        return TotpVerifier.isValidCode(totpKey, otpCode);
+    
+        try {
+            String base64TotpKey = String.valueOf(users.get(username).get("totp-key"));
+            byte[] totpKey = Base64.getDecoder().decode(base64TotpKey);
+    
+            String expected = TotpVerifier.getCurrentCode(totpKey);
+            System.out.println("User OTP: " + otpCode);
+            System.out.println("Expected OTP (now): " + expected);
+    
+            return TotpVerifier.isValidCode(totpKey, otpCode);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
+    
 
     /**
      * Returns the base64-encoded TOTP key for user creation response.

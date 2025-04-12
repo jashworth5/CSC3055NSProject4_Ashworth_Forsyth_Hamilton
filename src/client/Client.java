@@ -3,18 +3,15 @@ package client;
 import common.*;
 import util.SocketWrapper;
 
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManagerFactory;
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.security.KeyStore;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
-import java.util.Base64;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -78,8 +75,15 @@ public class Client {
             // Save the returned TOTP key
             this.username = username;
             this.totpKey = response.getPayload();
-            
+
+            // Save private key to file for later use
+            try (FileWriter writer = new FileWriter(username + "_privkey.txt")) {
+                writer.write(this.privateKey);
+            }
+
             return this.totpKey;
+
+            
         } finally {
             socket.close();
         }
@@ -98,6 +102,10 @@ public class Client {
             
             if (response.getStatus()) {
                 this.username = username;
+
+                // Load the previously saved private key from file
+                this.privateKey = Files.readString(Path.of(username + "_privkey.txt")).trim();
+
                 return true;
             } else {
                 return false;
@@ -175,23 +183,28 @@ public class Client {
         
         SocketWrapper socket = connect();
         try {
-            // Send get message request
-            GetMessage getMsg = new GetMessage(username);
-            socket.sendMessage(getMsg);
-            
-            // Get response with messages
-            StatusMessage response = new StatusMessage();
-            response.deserialize(socket.receiveMessage());
-            
-            if (!response.getStatus()) {
+
+            socket.sendMessage(new GetMessage(username));
+
+            JSONObject incoming = socket.receiveMessage();
+
+            System.out.println("[DEBUG] Received type: " + incoming.get("type"));
+
+
+            if ("Status".equals(incoming.get("type"))) {
+                StatusMessage response = new StatusMessage();
+                response.deserialize(incoming);
                 throw new Exception("Message retrieval failed: " + response.getPayload());
             }
-            
-            // Parse the JSON array of posts in the payload
-            List<PostObject> posts = parsePostObjects(response.getPayload());
-            
-            // Decrypt each message
-            return decryptPosts(posts, this.privateKey);
+
+            if ("GetResponseMessage".equals(incoming.get("type"))) {
+                ResponseMessage response = new ResponseMessage();
+                response.deserialize(incoming);
+                List<PostObject> posts = response.getPosts();
+                return decryptPosts(posts, this.privateKey);
+            }
+
+            throw new Exception("Invalid or unexpected message type.");
         } finally {
             socket.close();
         }
@@ -232,6 +245,12 @@ public class Client {
                 String encryptedMessage = post.getMessage();
                 String wrappedKey = post.getWrappedKey();
                 String iv = post.getIv();
+
+                // debug
+                if (encryptedMessage == null) System.out.println("Encrypted message is null");
+                if (wrappedKey == null) System.out.println("Wrapped key is null");
+                if (iv == null) System.out.println("IV is null");
+                if (privateKey == null) System.out.println("Private key is null");
                 
                 // Decrypt the message using the private key
                 String decrypted = EncryptionUtil.decryptMessage(
@@ -239,7 +258,9 @@ public class Client {
                 
                 decryptedMessages.add(decrypted);
             } catch (Exception e) {
-                // If we can't decrypt, add a placeholder message
+
+                e.printStackTrace();
+
                 decryptedMessages.add("[Encrypted message - cannot decrypt]");
             }
         }
@@ -255,5 +276,11 @@ public class Client {
         return this.username;
     }
 
+    public String getPrivateKey() {
+        return this.privateKey;
+    }
 
+    public void setPrivateKey(String privateKey) {
+        this.privateKey = privateKey;
+    }
 }

@@ -60,12 +60,14 @@ public class BulletinBoardService {
             System.out.println("[+] server started on port " + port);
 
         
+
             // server loop to accept clients
             while (true) {
-                SSLSocket client = (SSLSocket) serverSocket.accept();
-                SocketWrapper socket = new SocketWrapper(client);
-                System.out.println("[+] client connected");
 
+                SSLSocket client = (SSLSocket) serverSocket.accept();
+                System.out.println("[+] client connected");
+                SocketWrapper socket = new SocketWrapper(client);
+                
                 try {
 
                     // read message from client, get type
@@ -94,6 +96,7 @@ public class BulletinBoardService {
                             );
 
                             if (created) {
+
                                 // fetch the generated TOTP key and send it back to the client
                                 String totpKey = userDb.getTotpKey(createMsg.getUser());
                                 socket.sendMessage(new StatusMessage(true, totpKey));
@@ -103,16 +106,16 @@ public class BulletinBoardService {
                             break;
 
                         case "Authenticate":
-
                             AuthenticateMessage auth = new AuthenticateMessage();
-
-                            System.out.println("Valid password? " + userDb.validatePassword(auth.getUser(), auth.getPass()));
-                            System.out.println("Valid TOTP? " + userDb.validateTOTP(auth.getUser(), auth.getOtp()));
-
-
-                            auth.deserialize(message);
-                            boolean valid = userDb.validatePassword(auth.getUser(), auth.getPass()) &&
-                                            userDb.validateTOTP(auth.getUser(), auth.getOtp());
+                            auth.deserialize(message);  // ✅ deserialize first
+                        
+                            boolean passOk = userDb.validatePassword(auth.getUser(), auth.getPass());
+                            boolean totpOk = userDb.validateTOTP(auth.getUser(), auth.getOtp());
+                        
+                            System.out.println("Pass OK? " + passOk);
+                            System.out.println("TOTP OK? " + totpOk);
+                        
+                            boolean valid = passOk && totpOk;
                             socket.sendMessage(new StatusMessage(valid, valid ? "Authentication successful." : "Authentication failed."));
                             break;
 
@@ -140,17 +143,19 @@ public class BulletinBoardService {
                         case "GetMessage":
                             GetMessage getMsg = new GetMessage();
                             getMsg.deserialize(message);
+                        
                             List<PostObject> posts = board.getPosts(getMsg.getUser());
+                            System.out.println("[GetMessage] Posts found: " + posts.size());
+                        
                             if (posts.isEmpty()) {
+                                System.out.println("[GetMessage] No posts — sending status.");
                                 socket.sendMessage(new StatusMessage(false, "No such user or no messages."));
                             } else {
+                                System.out.println("[GetMessage] Sending ResponseMessage...");
                                 socket.sendMessage(new ResponseMessage(posts));
                             }
                             break;
-
-                        default:
-                            socket.sendMessage(new StatusMessage(false, "Unknown message type."));
-                            break;
+                        
                     }
                     
                 } catch (IOException e) {

@@ -1,8 +1,9 @@
 package common;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import merrimackutil.json.JSONSerializable;
-import merrimackutil.json.types.JSONObject;
 import merrimackutil.json.types.JSONType;
+import merrimackutil.json.types.JSONObject;
 
 import java.io.InvalidObjectException;
 
@@ -12,22 +13,35 @@ import java.io.InvalidObjectException;
  */
 public class PostObject implements JSONSerializable {
 
+    @JsonProperty("user")
     private String user;
+
+    @JsonProperty("message")
     private String message;
+
+    @JsonProperty("wrappedkey")
     private String wrappedkey;
+
+    @JsonProperty("iv")
     private String iv;
 
-    public PostObject(String user, String message, String wrappedkey, String iv) {
+    // default constructor for Jackson and deserialization
+    public PostObject() {}
+
+    // constructor with @JsonProperty to prevent camelCase issues
+    public PostObject(
+        @JsonProperty("user") String user,
+        @JsonProperty("message") String message,
+        @JsonProperty("wrappedkey") String wrappedkey,
+        @JsonProperty("iv") String iv
+    ) {
         this.user = user;
         this.message = message;
         this.wrappedkey = wrappedkey;
         this.iv = iv;
     }
 
-    public PostObject() {
-        // used for deserialization
-    }
-
+    // getters
     public String getUser() {
         return user;
     }
@@ -36,6 +50,7 @@ public class PostObject implements JSONSerializable {
         return message;
     }
 
+    @JsonProperty("wrappedkey")
     public String getWrappedKey() {
         return wrappedkey;
     }
