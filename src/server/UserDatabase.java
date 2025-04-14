@@ -1,4 +1,4 @@
-package server;
+package src.server;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -10,8 +10,8 @@ import java.util.Map;
 import merrimackutil.json.JsonIO;
 import merrimackutil.json.types.JSONArray;
 import merrimackutil.json.types.JSONObject;
-import util.TotpVerifier;
-import util.EncryptionUtil;
+import src.util.TotpVerifier;
+import src.util.EncryptionUtil;
 
 // imports added later
 

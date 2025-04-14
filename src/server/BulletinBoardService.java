@@ -1,16 +1,16 @@
-package server;
+package src.server;
 
-import util.SocketWrapper;
-import server.UserDatabase;
-import server.BulletinBoard;
-import common.AuthenticateMessage;
-import common.CreateMessage;
-import common.GetMessage;
-import common.PostMessage;
-import common.PostObject;
-import common.PubKeyRequestMessage;
-import common.ResponseMessage;
-import common.StatusMessage;
+import src.util.SocketWrapper;
+import src.server.UserDatabase;
+import src.server.BulletinBoard;
+import src.common.AuthenticateMessage;
+import src.common.CreateMessage;
+import src.common.GetMessage;
+import src.common.PostMessage;
+import src.common.PostObject;
+import src.common.PubKeyRequestMessage;
+import src.common.ResponseMessage;
+import src.common.StatusMessage;
 
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;

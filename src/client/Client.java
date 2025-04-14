@@ -1,7 +1,7 @@
-package client;
+package src.client;
 
-import common.*;
-import util.SocketWrapper;
+import src.common.*;
+import src.util.SocketWrapper;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
@@ -18,7 +18,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.ArrayList;
 
-import util.EncryptionUtil;
+import src.util.EncryptionUtil;
 
 import merrimackutil.json.types.JSONObject;
 import merrimackutil.json.types.JSONType;
