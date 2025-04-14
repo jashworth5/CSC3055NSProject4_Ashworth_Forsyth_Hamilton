@@ -1,15 +1,14 @@
-package src.server;
+package server;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
-import src.common.PostObject;
-import merrimackutil.json.JsonIO;
-import merrimackutil.json.types.JSONArray;
-import merrimackutil.json.types.JSONObject;
-import merrimackutil.json.types.JSONType;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+
+import common.PostObject;
 
 public class BulletinBoard {
     private final File boardFile;
@@ -18,63 +17,85 @@ public class BulletinBoard {
     public BulletinBoard(String filePath) {
         this.boardFile = new File(filePath);
         this.userPosts = new HashMap<>();
+        loadBulletinBoard();
+    }
 
-        if (boardFile.exists()) {
-            try {
-                JSONObject root = JsonIO.readObject(boardFile);
-                JSONArray postsArray = (JSONArray) root.get("posts");
+    /**
+     * Loads the posts from the board file using Jackson.
+     */
+    private void loadBulletinBoard() {
+        if (!boardFile.exists()) {
+            saveBulletinBoard(); // create empty file if missing
+            return;
+        }
 
-                for (int i = 0; i < postsArray.size(); i++) {
-                    PostObject post = new PostObject();
-                    post.deserialize((JSONType) postsArray.get(i));
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+
+            // read file into { "posts": [ ... ] }
+            Map<String, List<PostObject>> root = mapper.readValue(
+                boardFile, new TypeReference<Map<String, List<PostObject>>>() {}
+            );
+
+            List<PostObject> posts = root.get("posts");
+            if (posts != null) {
+                for (PostObject post : posts) {
                     addToMemory(post);
                 }
-
-                System.out.println("[+] Loaded " + postsArray.size() + " posts from bulletin board.");
-            } catch (Exception e) {
-                System.err.println("[!] Failed to load bulletin board: " + e.getMessage());
             }
-        } else {
-            saveBulletinBoard();
+
+            System.out.println("[+] Loaded " + posts.size() + " posts from bulletin board.");
+        } catch (Exception e) {
+            System.err.println("[!] Failed to load bulletin board: " + e.getMessage());
         }
     }
 
-    private void addToMemory(PostObject post) {
-        String username = post.getUser();
-        userPosts.computeIfAbsent(username, k -> new ArrayList<>()).add(post);
-    }
-
-    public boolean addPost(PostObject post) {
-        addToMemory(post);
-        return saveBulletinBoard();
-    }
-
-    public List<PostObject> getPosts(String username) {
-        return userPosts.getOrDefault(username, new ArrayList<>());
-    }
-
+    /**
+     * Saves all posts to the board file using Jackson formatting.
+     */
     private boolean saveBulletinBoard() {
         try {
-            JSONObject root = new JSONObject();
-            JSONArray postsArray = new JSONArray();
-
+            // collect all posts into a flat list
+            List<PostObject> allPosts = new ArrayList<>();
             for (List<PostObject> posts : userPosts.values()) {
-                for (PostObject post : posts) {
-                    postsArray.add(post.toJSONType());
-                }
+                allPosts.addAll(posts);
             }
 
-            root.put("posts", postsArray);
+            // wrap in a map for { "posts": [...] }
+            Map<String, Object> wrapper = new HashMap<>();
+            wrapper.put("posts", allPosts);
 
-            try (FileWriter writer = new FileWriter(boardFile)) {
-                writer.write(root.toString());
-                System.out.println("[+] Saved bulletin board to disk.");
-            }
+            ObjectMapper mapper = new ObjectMapper();
+            ObjectWriter writer = mapper.writerWithDefaultPrettyPrinter();
+            writer.writeValue(boardFile, wrapper);
 
             return true;
         } catch (IOException e) {
             System.err.println("[!] Failed to save bulletin board: " + e.getMessage());
             return false;
         }
+    }
+
+    /**
+     * Adds a post to the in-memory map and writes to disk.
+     */
+    public boolean addPost(PostObject post) {
+        addToMemory(post);
+        return saveBulletinBoard();
+    }
+
+    /**
+     * Gets all posts from a specific user.
+     */
+    public List<PostObject> getPosts(String username) {
+        return userPosts.getOrDefault(username, new ArrayList<>());
+    }
+
+    /**
+     * Adds a post to the in-memory map only.
+     */
+    private void addToMemory(PostObject post) {
+        String username = post.getUser();
+        userPosts.computeIfAbsent(username, k -> new ArrayList<>()).add(post);
     }
 }

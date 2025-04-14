@@ -1,4 +1,4 @@
-package src.common;
+package common;
 
 import merrimackutil.json.JSONSerializable;
 import merrimackutil.json.types.JSONObject;
@@ -7,11 +7,11 @@ import merrimackutil.json.types.JSONType;
 import java.io.InvalidObjectException;
 
 /**
- * represents a response message with a boolean status and a payload string
+ * represents the server's response message with a boolean status and a payload string
  */
 public class StatusMessage implements JSONSerializable {
 
-    private static final String TYPE = "status"; 
+    private static final String TYPE = "Status"; 
 
     private boolean status;
     private String payload;

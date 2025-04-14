@@ -1,7 +1,7 @@
 {
     "users-file": "users.json",
-    "port": 4444,
-    "keystore-file": "keystore.p12",
+    "port": 5001,
+    "keystore-file": "keystore.jks",
     "keystore-pass": "password123",
     "board-file": "board.json",
     "debug": true

@@ -1,4 +1,4 @@
-package src.common;
+package common;
 
 import merrimackutil.json.JSONSerializable;
 import merrimackutil.json.types.JSONObject;
@@ -12,7 +12,7 @@ import java.io.InvalidObjectException;
  */
 public class CreateMessage implements JSONSerializable {
 
-    private static final String TYPE = "create";
+    private static final String TYPE = "Create";
 
     private String user;
     private String pass;

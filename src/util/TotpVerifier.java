@@ -1,5 +1,7 @@
-package src.util;
+package util;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.crypto.params.KeyParameter;
